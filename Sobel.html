@@ -1,0 +1,97 @@
+<HTML>
+<BODY>
+<canvas width="500" height="500" id="lab01">
+</canvas>
+
+<canvas width="500" height="500" id="lab02">
+</canvas>
+<script>
+    var canvas = document.getElementById("lab01");
+    var ctx = canvas.getContext("2d");
+
+    var canvas2 = document.getElementById("lab02");
+    var ctx2 = canvas2.getContext("2d");
+
+    function matrixOperation(ourMatrix, defaultMatrix, size) {
+        let res = 0;
+        for (let i = 0; i < size; ++i) {
+            for (let j = 0; j < size; ++j) {
+                res += ourMatrix[i][j] * defaultMatrix[i][j];
+            }
+        }
+        return res;
+    }
+
+    function doubleMatrixOperation(ourMatrix, defaultMatrix1, defaultMatrix2, size) {
+        let a = matrixOperation(ourMatrix, defaultMatrix1, size);
+        let b = matrixOperation(ourMatrix, defaultMatrix2, size);
+        return Math.sqrt(a * a + b * b);
+    }
+
+    function matrixCreation(img_data_massive, startIndex, size) {
+        let matrix = [];
+        for (let i = 0; i < size; ++i) {
+            matrix[i] = [];
+            for (let j = 0; j < size; ++j) {
+                try {
+                    matrix[i][j] = img_data_massive[startIndex + j];
+                    // console.log(img_data_massive[startIndex + j]);
+                } catch (out_of_range) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        // }
+        // for (let i = 0; i < size; ++i) {
+        //     for (let j = 0; j < size; ++j) {
+        //         console.log(matrix[i][j]);
+        //     }
+        // }
+        return matrix;
+    }
+
+    function Sobel1(img_data, defaultMatrix1, defaultMatrix2, startIndex, newImgData) {
+        let mas = [];
+        //mas.resize(img_data.data.length / 4);
+        let j = 0;
+        for (let i = startIndex; i < img_data.data.length; i += 4) {
+            mas[j] = img_data.data[i];
+            ++j;
+        }
+        for (let i = startIndex; i < img_data.data.length; i += 4) {
+            let matrix = matrixCreation(mas, i, 3);
+            newImgData[i] = doubleMatrixOperation(matrix, defaultMatrix1, defaultMatrix2, 3);
+        }
+        //console.log(newImgData);
+    }
+
+    function Sobel(img_data) {
+        let defaultMatrix1 = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+        let defaultMatrix2 = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+        let newImgData = ctx.createImageData(canvas.width, canvas.height);
+        for (let i = 0; i < img_data.data.length; ++i){
+            newImgData.data[i] = img_data.data[i];
+        }
+        ctx2.putImageData(newImgData, 0, 0);
+        console.log(img_data.data);
+        console.log("start ", newImgData.data);
+        for (let i = 0; i < 3; ++i) {
+            Sobel1(img_data, defaultMatrix1, defaultMatrix2, i, newImgData.data);
+        }
+        console.log("final ", newImgData.data);
+
+    }
+
+    let img = new Image;
+    img.crossOrigin = 'Anonymous';
+    img.src = 'https://raw.githubusercontent.com/ekildishev/graphics-lab04/master/e3478a723d21401f3a4ad4832dd4c827.jpg';
+    img.onload = function () {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        let img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        Sobel(img_data);
+    };
+
+</script>
+
+</BODY>
+</HTML>

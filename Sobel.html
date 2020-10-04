@@ -5,12 +5,18 @@
 
 <canvas width="500" height="500" id="lab02">
 </canvas>
+
+<canvas width="500" height="500" id="lab03">
+</canvas>
 <script>
     var canvas = document.getElementById("lab01");
     var ctx = canvas.getContext("2d");
 
     var canvas2 = document.getElementById("lab02");
     var ctx2 = canvas2.getContext("2d");
+
+    var canvas3 = document.getElementById("lab03");
+    var ctx3 = canvas3.getContext("2d");
 
     function matrixOperation(ourMatrix, defaultMatrix, size) {
         let res = 0;
@@ -48,7 +54,6 @@
             for (let j = 0; j < size; ++j) {
                 if (x + j > 0 && x + j - 1 < canvas.width && y + i > 0 && y + i - 1 < canvas.height) {
                     matrix[i][j] = img_data_massive[y + i - 1][x + j - 1];
-                    // console.log(img_data_massive[startIndex + j]);
                 } else {
                     matrix[i][j] = 0;
                 }
@@ -65,15 +70,12 @@
             let matrix = matrixCreation(imgMatrix, i, 3, x, y);
             if (x !== canvas.width - 1) {
                 ++x;
-                //console.log("x ", x, ", y ", y, "  ", matrix);
             } else {
                 ++y;
                 x = 0;
-                //console.log("y ", y, "   ", matrix);
             }
             newImgData[i] = doubleMatrixOperation(matrix, defaultMatrix1, defaultMatrix2, 3);
         }
-        console.log(newImgData);
     }
 
     function Sobel(img_data) {
@@ -83,13 +85,54 @@
         for (let i = 3; i < img_data.data.length; i += 4) {
             newImgData.data[i] = img_data.data[i];
         }
-        console.log("base ", img_data.data);
-        console.log("copied ", newImgData.data);
         for (let i = 0; i < 3; ++i) {
             Sobel1(img_data, defaultMatrix1, defaultMatrix2, i, newImgData.data);
         }
-        console.log("final ", newImgData.data);
         ctx2.putImageData(newImgData, 0, 0);
+    }
+
+    function gaussDistribution(sigma, x, y){
+        return (Math.exp(-(Math.pow(x,2)+Math.pow(y, 2))/2*(sigma*sigma))/(2*Math.PI*sigma*sigma));
+    }
+
+    function gaussMatrixCreation(){
+        let matrix = [];
+        for (let x = 0; x < 5; ++x){
+            matrix[x] = [];
+            for (let y = 0; y < 5; ++y){
+                matrix[x][y] = gaussDistribution(1, x - 2, y - 2);
+            }
+        }
+        return matrix;
+    }
+
+    function Gauss1(img_data, defaultMatrix, startIndex, newImgData){
+        let imgMatrix = massiveToMatrix(img_data.data, startIndex);
+        let x = 0;
+        let y = 0;
+        for (let i = startIndex; i < img_data.data.length; i += 4) {
+            let matrix = matrixCreation(imgMatrix, i, 5, x, y);
+            if (x !== canvas.width - 1) {
+                ++x;
+            } else {
+                ++y;
+                x = 0;
+            }
+            newImgData[i] = matrixOperation(matrix, defaultMatrix, 5);
+        }
+    }
+
+    function Gauss(img_data){
+        let matrix = gaussMatrixCreation(5);
+        let newImgData = ctx.createImageData(canvas.width, canvas.height);
+        for (let i = 3; i < img_data.data.length; i += 4) {
+            newImgData.data[i] = img_data.data[i];
+        }
+        for (let i = 0; i < 3; ++i) {
+            Gauss1(img_data, matrix, i, newImgData.data);
+        }
+        console.log(newImgData);
+        ctx3.putImageData(newImgData, 0, 0);
     }
 
     let img = new Image;
@@ -99,6 +142,7 @@
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         let img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
         Sobel(img_data);
+        Gauss(img_data);
     };
 
 </script>

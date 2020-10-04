@@ -41,13 +41,13 @@
         return matrix;
     }
 
-    function matrixCreation(img_data_matrix, startIndex, size, x, y) {
+    function matrixCreation(img_data_massive, startIndex, size, x, y) {
         let matrix = [];
         for (let i = 0; i < size; ++i) {
             matrix[i] = [];
             for (let j = 0; j < size; ++j) {
                 if (x + j > 0 && x + j - 1 < canvas.width && y + i > 0 && y + i - 1 < canvas.height) {
-                    matrix[i][j] = img_data_matrix[y + i - 1][x + j - 1];
+                    matrix[i][j] = img_data_massive[y + i - 1][x + j - 1];
                     // console.log(img_data_massive[startIndex + j]);
                 } else {
                     matrix[i][j] = 0;

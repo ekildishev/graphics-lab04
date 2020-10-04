@@ -35,7 +35,7 @@
         }
         for (let i = 0; i < canvas.height; ++i) {
             for (let j = 0; j < canvas.width; ++j) {
-                matrix[i][j] = img_data_massive[startIndex + i * canvas.width + 4 * j];
+                matrix[i][j] = img_data_massive[startIndex + 4 * i * canvas.width + 4 * j];
             }
         }
         return matrix;
@@ -80,10 +80,10 @@
         let defaultMatrix1 = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
         let defaultMatrix2 = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
         let newImgData = ctx.createImageData(canvas.width, canvas.height);
-        for (let i = 0; i < img_data.data.length; ++i) {
+        for (let i = 3; i < img_data.data.length; i += 4) {
             newImgData.data[i] = img_data.data[i];
         }
-        console.log("base ",img_data.data);
+        console.log("base ", img_data.data);
         console.log("copied ", newImgData.data);
         for (let i = 0; i < 3; ++i) {
             Sobel1(img_data, defaultMatrix1, defaultMatrix2, i, newImgData.data);

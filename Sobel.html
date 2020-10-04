@@ -28,58 +28,68 @@
         return Math.sqrt(a * a + b * b);
     }
 
-    function matrixCreation(img_data_massive, startIndex, size) {
+    function massiveToMatrix(img_data_massive, startIndex) {
+        let matrix = [];
+        for (let i = 0; i < canvas.width; ++i) {
+            matrix[i] = [];
+        }
+        for (let i = 0; i < canvas.height; ++i) {
+            for (let j = 0; j < canvas.width; ++j) {
+                matrix[i][j] = img_data_massive[startIndex + i * canvas.width + 4 * j];
+            }
+        }
+        return matrix;
+    }
+
+    function matrixCreation(img_data_matrix, startIndex, size, x, y) {
         let matrix = [];
         for (let i = 0; i < size; ++i) {
             matrix[i] = [];
             for (let j = 0; j < size; ++j) {
-                try {
-                    matrix[i][j] = img_data_massive[startIndex + j];
+                if (x + j > 0 && x + j - 1 < canvas.width && y + i > 0 && y + i - 1 < canvas.height) {
+                    matrix[i][j] = img_data_matrix[y + i - 1][x + j - 1];
                     // console.log(img_data_massive[startIndex + j]);
-                } catch (out_of_range) {
+                } else {
                     matrix[i][j] = 0;
                 }
             }
         }
-        // }
-        // for (let i = 0; i < size; ++i) {
-        //     for (let j = 0; j < size; ++j) {
-        //         console.log(matrix[i][j]);
-        //     }
-        // }
         return matrix;
     }
 
     function Sobel1(img_data, defaultMatrix1, defaultMatrix2, startIndex, newImgData) {
-        let mas = [];
-        //mas.resize(img_data.data.length / 4);
-        let j = 0;
+        let imgMatrix = massiveToMatrix(img_data.data, startIndex);
+        let x = 0;
+        let y = 0;
         for (let i = startIndex; i < img_data.data.length; i += 4) {
-            mas[j] = img_data.data[i];
-            ++j;
-        }
-        for (let i = startIndex; i < img_data.data.length; i += 4) {
-            let matrix = matrixCreation(mas, i, 3);
+            let matrix = matrixCreation(imgMatrix, i, 3, x, y);
+            if (x !== canvas.width - 1) {
+                ++x;
+                //console.log("x ", x, ", y ", y, "  ", matrix);
+            } else {
+                ++y;
+                x = 0;
+                //console.log("y ", y, "   ", matrix);
+            }
             newImgData[i] = doubleMatrixOperation(matrix, defaultMatrix1, defaultMatrix2, 3);
         }
-        //console.log(newImgData);
+        console.log(newImgData);
     }
 
     function Sobel(img_data) {
         let defaultMatrix1 = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
         let defaultMatrix2 = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
         let newImgData = ctx.createImageData(canvas.width, canvas.height);
-        for (let i = 0; i < img_data.data.length; ++i){
+        for (let i = 0; i < img_data.data.length; ++i) {
             newImgData.data[i] = img_data.data[i];
         }
-        ctx2.putImageData(newImgData, 0, 0);
-        console.log(img_data.data);
-        console.log("start ", newImgData.data);
+        console.log("base ",img_data.data);
+        console.log("copied ", newImgData.data);
         for (let i = 0; i < 3; ++i) {
             Sobel1(img_data, defaultMatrix1, defaultMatrix2, i, newImgData.data);
         }
         console.log("final ", newImgData.data);
-
+        ctx2.putImageData(newImgData, 0, 0);
     }
 
     let img = new Image;
